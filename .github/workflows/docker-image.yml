@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        versions: [6]
+        versions: [6, 8]
     env:
       repo: "govpf/redis"
     steps:
