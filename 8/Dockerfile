@@ -24,7 +24,6 @@ RUN set -eux; \
         libssl-dev \
         pkg-config \
         tcl \
-        libjemalloc-dev \
     ; \
     rm -rf /var/lib/apt/lists/*
 
@@ -42,7 +41,7 @@ RUN set -eux; \
     mkdir -p /usr/src/redis; \
     tar -xzf redis.tar.gz -C /usr/src/redis --strip-components=1; \
     rm redis.tar.gz; \
-    make -C /usr/src/redis -j"$(nproc)" BUILD_TLS=yes; \
+    make -C /usr/src/redis -j"$(nproc)" BUILD_TLS=yes MALLOC=libc; \
     make -C /usr/src/redis install; \
     rm -rf /usr/src/redis
 
