@@ -14,20 +14,13 @@ RUN groupadd --system --gid 999 redis \
 
 # install runtime/build dependencies
 RUN set -eux; \
-    apt-get update; \
-    apt-get install -y --no-install-recommends \
-        ca-certificates \
-        wget \
-        gcc \
-        make \
-        libc6-dev \
-        libssl-dev \
-        pkg-config \
-        tcl \
-        dpkg-dev \
-        git \
-    ; \
-    rm -rf /var/lib/apt/lists/*
+    wget -O redis.tar.gz "${REDIS_DOWNLOAD_URL}"; \
+    mkdir -p /usr/src/redis; \
+    tar -xzf redis.tar.gz -C /usr/src/redis --strip-components=1; \
+    rm redis.tar.gz; \
+    make -C /usr/src/redis -j"$(nproc)" BUILD_TLS=yes; \
+    make -C /usr/src/redis install; \
+    rm -rf /usr/src/redis
 
 # gosu
 RUN set -eux; \
