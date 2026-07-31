@@ -12,15 +12,21 @@ ENV GOSU_VERSION=1.17
 RUN groupadd --system --gid 999 redis \
  && useradd --system --uid 999 --gid redis --home-dir /data redis
 
-# install runtime/build dependencies
+# Build dependencies
 RUN set -eux; \
-    wget -O redis.tar.gz "${REDIS_DOWNLOAD_URL}"; \
-    mkdir -p /usr/src/redis; \
-    tar -xzf redis.tar.gz -C /usr/src/redis --strip-components=1; \
-    rm redis.tar.gz; \
-    make -C /usr/src/redis -j"$(nproc)" BUILD_TLS=yes; \
-    make -C /usr/src/redis install; \
-    rm -rf /usr/src/redis
+    apt-get update; \
+    apt-get install -y --no-install-recommends \
+        ca-certificates \
+        wget \
+        gcc \
+        make \
+        libc6-dev \
+        libssl-dev \
+        pkg-config \
+        tcl \
+        libjemalloc-dev \
+    ; \
+    rm -rf /var/lib/apt/lists/*
 
 # gosu
 RUN set -eux; \
@@ -28,9 +34,9 @@ RUN set -eux; \
     wget -O /usr/local/bin/gosu \
       "https://github.com/tianon/gosu/releases/download/${GOSU_VERSION}/gosu-${dpkgArch}"; \
     chmod +x /usr/local/bin/gosu; \
-    gosu nobody true
+    gosu --version
 
-# build redis
+# Build Redis
 RUN set -eux; \
     wget -O redis.tar.gz "${REDIS_DOWNLOAD_URL}"; \
     mkdir -p /usr/src/redis; \
@@ -40,6 +46,7 @@ RUN set -eux; \
     make -C /usr/src/redis install; \
     rm -rf /usr/src/redis
 
+# Data directory
 RUN mkdir -p /data \
  && chown redis:redis /data
 
@@ -47,6 +54,7 @@ VOLUME /data
 WORKDIR /data
 
 COPY docker-entrypoint.sh /usr/local/bin/
+
 ENTRYPOINT ["docker-entrypoint.sh"]
 
 EXPOSE 6379
