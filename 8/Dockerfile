@@ -1,5 +1,8 @@
 FROM redis:8-trixie
 
+LABEL govpf.category="database"
+LABEL govpf.fromimage="redis:8-trixie"
+
 COPY docker-entrypoint.sh /usr/local/bin/
 
 VOLUME /data
